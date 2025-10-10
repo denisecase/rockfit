@@ -12,15 +12,14 @@
 import packageInfo from "../package.json";
 
 import { newGameState, GameState } from "./game/state";
-import { spawnPiece, move } from "./game/transitions";
-import { bindInput } from "./systems/input";
+import { spawnPiece, move, rotate, togglePause, restart } from "./game/transitions";
 import { render } from "./systems/renderer";
 import { updateHUD } from "./ui/hud";
 import { speedForLevel } from "./kit/scoring";
 import { installKeyboard } from "./systems/input";
 import { installTouchControls } from "./systems/touch";
 
-// Grab DOM elements
+// Grab Document elements
 const gameCanvas = document.getElementById("game") as HTMLCanvasElement | null;
 const nextCanvas = document.getElementById("next") as HTMLCanvasElement | null;
 const hudEl = document.getElementById("hud") as HTMLDivElement | null;
@@ -40,21 +39,47 @@ if (!gameCanvas || !nextCanvas || !hudEl || !overlayEl) {
 
 // 1) Create state and spawn the first piece
 let state: GameState = spawnPiece(newGameState());
+console.log("[RockFit] Initial state:", {
+  level: state.level,
+  nextKey: state.nextKey,
+  active: !!state.active,
+  gridSize: `${state.grid[0]?.length}x${state.grid.length}`
+});
 
-// 2) Install keyboard controls (prevent default scrolling
+// Render once immediately so you always see the first piece
+render(gameCanvas!, nextCanvas!, state);
+updateHUD(hudEl!, overlayEl!, state);
+
+// If first spawn failed, log it (you’ll see overlay = game over)
+if (!state.active) {
+  console.warn(
+    "[RockFit] No active piece after spawn; gameOver?",
+    state.gameOver,
+    "nextKey:",
+    state.nextKey
+  );
+}
+
+// 2) Install input installers (keyboard + touch)
 const getState = () => state;
 const setState = (next: GameState) => {
-  state = next;
-  render(gameCanvas, nextCanvas, state);
-  updateHUD(hudEl, overlayEl, state);
+  if (next !== state) {
+    state = next;
+    render(gameCanvas!, nextCanvas!, state);
+    updateHUD(hudEl, overlayEl, state);
+  }
 };
 
-// Mount the listener; it returns a cleanup function if needed
+// ---- Input (keyboard + touch) ---------------------------------------------
 const disposeKeyboard = installKeyboard(getState, setState);
 
-// Touch (mobile)
-const touchRoot = document.getElementById("touch");
-installTouchControls(touchRoot, getState, setState);
+// Touch is optional — safely no-op if #touch missing
+const touchRoot = document.getElementById("touch") as HTMLElement | null;
+try {
+  installTouchControls(touchRoot, getState, setState);
+} catch (e) {
+  console.error("[RockFit] installTouchControls failed:", e);
+}
 
 // 3) Game loop (gravity / drop). requestAnimationFrame + a timer.
 let lastTime = performance.now();
@@ -66,22 +91,37 @@ function loop(now: number) {
 
   if (!state.paused && !state.gameOver) {
     dropAccum += dt;
-    const dropEvery = speedForLevel(state.level); // ms per auto-drop
+
+    // Guard against bad config: clamp to a sane default if needed (ms/frame).
+    const cfg = speedForLevel(state.level);
+    const dropEvery = Math.max(60, Number.isFinite(cfg as number) ? (cfg as number) : 800);
+
+    // Debug once if cfg looked bad
+    if (!Number.isFinite(cfg as number)) {
+      console.warn("[RockFit] speedForLevel returned non-finite value; using fallback 800ms", {
+        level: state.level,
+        cfg
+      });
+    }
+
+    // Apply as many drops as we owe
     while (dropAccum >= dropEvery) {
       const before = state;
       state = move(state, 0, 1); // try to drop by one row
       dropAccum -= dropEvery;
+
       if (state !== before) {
         // state changed (moved, locked, cleared, or spawned)
         render(gameCanvas!, nextCanvas!, state);
         updateHUD(hudEl!, overlayEl!, state);
       } else {
         // couldn't move down (blocked but not locked) — nothing to do
+        break;
       }
     }
   }
 
-  // Paint every frame to keep it smooth (even if state didn’t change)
+  // Paint every frame to stay responsive
   render(gameCanvas!, nextCanvas!, state);
   updateHUD(hudEl!, overlayEl!, state);
 
