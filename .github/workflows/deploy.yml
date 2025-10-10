@@ -16,7 +16,7 @@
 #   https://denisecase.github.io/rockfit/
 # ============================================================
 
-name: Deploy to GitHub Pages
+name: Deploy
 
 on:
   # Run this workflow whenever the main branch is updated

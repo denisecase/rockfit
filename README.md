@@ -1,7 +1,8 @@
 # RockFit (Falling Blocks Game)
 
+[![CI](https://github.com/denisecase/rockfit/actions/workflows/ci.yml/badge.svg)](https://github.com/denisecase/rockfit/actions/workflows/ci.yml)
 [![Deploy](https://github.com/denisecase/rockfit/actions/workflows/deploy.yml/badge.svg)](https://github.com/denisecase/rockfit/actions/workflows/deploy.yml)
-[![Pages Build](https://github.com/denisecase/rockfit/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/denisecase/rockfit/actions/workflows/pages/pages-build-deployment)
+[![CodeQL](https://github.com/denisecase/rockfit/actions/workflows/codeql.yml/badge.svg)](https://github.com/denisecase/rockfit/actions/workflows/codeql.yml)
 ![Node](https://img.shields.io/badge/node-22.x-339933?logo=node.js)
 ![typescript dev dep](https://img.shields.io/github/package-json/dependency-version/denisecase/rockfit/dev/typescript)
 ![vite dev dep](https://img.shields.io/github/package-json/dependency-version/denisecase/rockfit/dev/vite)
