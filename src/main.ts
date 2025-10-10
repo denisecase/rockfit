@@ -1,3 +1,4 @@
+console.log("[RockFit] main.ts loaded");
 // ============================================================
 // File: src/main.ts
 // Purpose: App entry — wire state, input, loop, rendering, HUD
@@ -129,3 +130,19 @@ function loop(now: number) {
 }
 
 requestAnimationFrame(loop);
+
+// Register SW (only in production, and only if supported)
+if ("serviceWorker" in navigator) {
+  const base = import.meta.env.BASE_URL || "/";
+  const buildId = (import.meta as any).env?.VITE_BUILD_ID || Date.now().toString();
+  // e.g. /rockfit/service-worker.js?v=abcdef1
+  const swUrl = `${base}service-worker.js?v=${encodeURIComponent(buildId)}`;
+  navigator.serviceWorker.register(swUrl).catch((err) => {
+    console.warn("SW register failed:", err);
+  });
+}
+
+console.log("[RockFit] main.ts boot", {
+  BASE_URL: (import.meta as any).env?.BASE_URL,
+  VITE_BUILD_ID: (import.meta as any).env?.VITE_BUILD_ID
+});

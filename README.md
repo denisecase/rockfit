@@ -40,14 +40,14 @@ You can play **RockFit** using a keyboard or by tapping on-screen buttons (on ph
 
 When opened on a phone or tablet, **RockFit** shows a touch bar along the bottom of the screen with large, easy-to-tap buttons:
 
-| Button | Action                       |
-| ------ | ---------------------------- |
-| ⟵ / ⟶  | Move left / right            |
-| ⟳      | Rotate piece                 |
-| ⟱      | Soft drop (move down slowly) |
-| ⏬     | Hard drop (instant)          |
-| ⏯     | Pause / Resume               |
-| ↺      | Restart game                 |
+| Button  | Action                       |
+| ------- | ---------------------------- |
+| ⬅️ / ➡️ | Move left / right            |
+| ⬆️      | Rotate piece                 |
+| ⬇️      | Soft drop (move down slowly) |
+| ⏬      | Hard drop (instant)          |
+| ⏸️      | Pause / Resume               |
+| 🔄      | Restart game                 |
 
 > The touch bar hides automatically on large screens but always appears on mobile.
 > You can modify its look and feel in `index.css` under **“Touch controls (mobile)”**.

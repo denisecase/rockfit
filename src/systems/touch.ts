@@ -8,7 +8,7 @@
 // ============================================================
 
 import type { GameState } from "../game/state";
-import { move, rotate, togglePause, restart } from "../game/transitions";
+import { move, rotate, togglePause, restart, hardDrop } from "../game/transitions";
 
 type Getter = () => GameState;
 type Setter = (next: GameState) => void;
@@ -29,18 +29,6 @@ export function installTouchControls(root: HTMLElement | null, get: Getter, set:
     if (s.paused && fn !== togglePause && fn !== restart) return;
     const next = fn(s);
     if (next !== s) set(next);
-  };
-
-  // Implement hard drop using repeated move until it locks
-  const hardDrop = (s: GameState): GameState => {
-    let prev = s,
-      cur = s;
-    // move() locks automatically when dy>0 collides; loop until state stops changing
-    do {
-      prev = cur;
-      cur = move(cur, 0, 1);
-    } while (cur !== prev && !cur.gameOver && cur.active !== null);
-    return cur;
   };
 
   // Map action strings to transitions

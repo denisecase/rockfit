@@ -39,11 +39,14 @@ jobs:
       # 1. Get the latest code from the repository
       - uses: actions/checkout@v5
 
-      # 2. Set up Node.js (the environment Vite needs to build)
+      # 2A. Set up Node.js (the environment Vite needs to build)
       - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
+
+      # 2B. Set a unique build ID (the current commit SHA)
+      - run: echo "VITE_BUILD_ID=${{ github.sha }}" >> $GITHUB_ENV
 
       # 3. Install dependencies listed in package.json
       - run: npm ci
