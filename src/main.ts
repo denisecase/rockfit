@@ -9,6 +9,8 @@
 //  - updates the canvas and the HUD each frame
 // ============================================================
 
+import packageInfo from "../package.json";
+
 import { newGameState, GameState } from "./game/state";
 import { spawnPiece, move } from "./game/transitions";
 import { bindInput } from "./systems/input";
@@ -22,6 +24,12 @@ const gameCanvas = document.getElementById("game") as HTMLCanvasElement | null;
 const nextCanvas = document.getElementById("next") as HTMLCanvasElement | null;
 const hudEl = document.getElementById("hud") as HTMLDivElement | null;
 const overlayEl = document.getElementById("overlay") as HTMLDivElement | null;
+const footerEl = document.getElementById("version");
+
+if (footerEl) {
+  const updated = new Date(document.lastModified).toISOString().split("T")[0];
+  footerEl.textContent = ` • Version: ${packageInfo.version} • Updated: ${updated}`;
+}
 
 if (!gameCanvas || !nextCanvas || !hudEl || !overlayEl) {
   throw new Error(
