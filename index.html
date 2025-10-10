@@ -1,75 +1,75 @@
 <!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>RockFit</title>
+    <meta
+      name="description"
+      content="A learner-friendly falling-blocks game built with TypeScript and HTML5 Canvas."
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./index.css" />
+    <link rel="icon" type="image/png" href="./favicon.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  </head>
 
-<head>
-  <meta charset="utf-8" />
-  <title>RockFit</title>
-  <meta name="description" content="A learner-friendly falling-blocks game built with TypeScript and HTML5 Canvas." />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="stylesheet" href="./index.css" />
-  <link rel="icon" type="image/png" href="./favicon.png" sizes="192x192" />
-  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
-
-</head>
-
-<body>
-  <!-- Game + Side Panels -->
-  <div class="wrap">
-    <canvas id="game" width="300" height="600"></canvas>
-    <div id="side">
-      <div class="panel">
-        <div class="title">Status</div>
-        <div id="hud">Score: 0 | Level: 1 | Lines: 0</div>
-      </div>
-      <div class="panel">
-        <div class="title">Next</div>
-        <canvas id="next" width="150" height="150"></canvas>
-      </div>
-      <div class="panel">
-        <div class="title">Controls</div>
-        <div class="small">
-          Arrow Left/Right: move<br />Arrow Up: rotate<br />Arrow Down: soft drop<br />Space: hard
-          drop<br />P: pause/resume<br />R: restart
+  <body>
+    <!-- Game + Side Panels -->
+    <div class="wrap">
+      <canvas id="game" width="300" height="600"></canvas>
+      <div id="side">
+        <div class="panel">
+          <div class="title">Status</div>
+          <div id="hud">Score: 0 | Level: 1 | Lines: 0</div>
+        </div>
+        <div class="panel">
+          <div class="title">Next</div>
+          <canvas id="next" width="150" height="150"></canvas>
+        </div>
+        <div class="panel">
+          <div class="title">Controls</div>
+          <div class="small">
+            Arrow Left/Right: move<br />Arrow Up: rotate<br />Arrow Down: soft drop<br />Space: hard
+            drop<br />P: pause/resume<br />R: restart
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div id="overlay"></div>
+    <div id="overlay"></div>
 
-  <!-- Touch Controls (shown on small screens) -->
-  <div id="touch" class="touchbar" aria-label="Touch controls" role="group">
-    <button data-action="left" class="btn" aria-label="Move left">⬅️</button>
-    <div class="btn-col">
-      <button data-action="rotate" class="btn" aria-label="Rotate">⬆️</button>
-      <button data-action="down" class="btn" aria-label="Soft drop">⬇️</button>
+    <!-- Touch Controls (shown on small screens) -->
+    <div id="touch" class="touchbar" aria-label="Touch controls" role="group">
+      <button data-action="left" class="btn" aria-label="Move left">⬅️</button>
+      <div class="btn-col">
+        <button data-action="rotate" class="btn" aria-label="Rotate">⬆️</button>
+        <button data-action="down" class="btn" aria-label="Soft drop">⬇️</button>
+      </div>
+      <button data-action="right" class="btn" aria-label="Move right">➡️</button>
+
+      <div class="btn-spacer"></div>
+
+      <button data-action="hard" class="btn" aria-label="Hard drop (Space)">⏬</button>
+      <button data-action="pause" class="btn" aria-label="Pause / Resume">⏸️</button>
+      <button data-action="restart" class="btn" aria-label="Restart">🔄</button>
     </div>
-    <button data-action="right" class="btn" aria-label="Move right">➡️</button>
 
-    <div class="btn-spacer"></div>
+    <!-- Footer -->
+    <footer id="footer" aria-label="Project links and build info">
+      <span>RockFit:</span>
+      <a href="https://denisecase.github.io/rockfit/" target="_blank" rel="noopener">Site</a> |
+      <a href="https://github.com/denisecase/rockfit" target="_blank" rel="noopener">Source</a>
+      <span id="version"></span>
+    </footer>
 
-    <button data-action="hard" class="btn" aria-label="Hard drop (Space)">⏬</button>
-    <button data-action="pause" class="btn" aria-label="Pause / Resume">⏸️</button>
-    <button data-action="restart" class="btn" aria-label="Restart">🔄</button>
-  </div>
-
-
-  <!-- Footer -->
-  <footer id="footer" aria-label="Project links and build info">
-    <span>RockFit:</span>
-    <a href="https://denisecase.github.io/rockfit/" target="_blank" rel="noopener">Site</a> |
-    <a href="https://github.com/denisecase/rockfit" target="_blank" rel="noopener">Source</a>
-    <span id="version"></span>
-  </footer>
-
-  <script type="module" src="/src/main.ts"></script>
-  <script>
-    // Dynamically set version + date if available
-    const version = "0.0.1";
-    const updated = "2025-10-10";
-    document.getElementById("version").textContent = ` • Version: ${version} • Updated: ${updated}`;
-  </script>
-</body>
-
+    <script type="module" src="/src/main.ts"></script>
+    <script>
+      // Dynamically set version + date if available
+      const version = "0.0.1";
+      const updated = "2025-10-10";
+      document.getElementById("version").textContent =
+        ` • Version: ${version} • Updated: ${updated}`;
+    </script>
+  </body>
 </html>

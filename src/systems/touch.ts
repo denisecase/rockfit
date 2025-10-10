@@ -33,7 +33,8 @@ export function installTouchControls(root: HTMLElement | null, get: Getter, set:
 
   // Implement hard drop using repeated move until it locks
   const hardDrop = (s: GameState): GameState => {
-    let prev = s, cur = s;
+    let prev = s,
+      cur = s;
     // move() locks automatically when dy>0 collides; loop until state stops changing
     do {
       prev = cur;
@@ -45,18 +46,33 @@ export function installTouchControls(root: HTMLElement | null, get: Getter, set:
   // Map action strings to transitions
   const once = (action: Action) => {
     switch (action) {
-      case "left":   return apply((s) => move(s, -1, 0));
-      case "right":  return apply((s) => move(s, +1, 0));
-      case "down":   return apply((s) => move(s, 0, +1));
-      case "rotate": return apply((s) => rotate(s));
-      case "hard":   return apply((s) => hardDrop(s));
-      case "pause":  return apply((s) => togglePause(s));
-      case "restart":return apply((s) => restart(s));
+      case "left":
+        return apply((s) => move(s, -1, 0));
+      case "right":
+        return apply((s) => move(s, +1, 0));
+      case "down":
+        return apply((s) => move(s, 0, +1));
+      case "rotate":
+        return apply((s) => rotate(s));
+      case "hard":
+        return apply((s) => hardDrop(s));
+      case "pause":
+        return apply((s) => togglePause(s));
+      case "restart":
+        return apply((s) => restart(s));
     }
   };
 
   // Press-and-hold repeat for left/right/down
-  const repeats: Record<Action, boolean> = { left: true, right: true, down: true, rotate: false, hard: false, pause: false, restart: false };
+  const repeats: Record<Action, boolean> = {
+    left: true,
+    right: true,
+    down: true,
+    rotate: false,
+    hard: false,
+    pause: false,
+    restart: false
+  };
 
   const handles = new Map<HTMLElement, RepeatHandle>();
 
@@ -107,9 +123,13 @@ export function installTouchControls(root: HTMLElement | null, get: Getter, set:
   }
 
   // Prevent double-tap zoom on iOS
-  root.addEventListener("touchend", (e) => {
-    if ((e as TouchEvent).target instanceof HTMLElement) e.preventDefault();
-  }, { passive: false });
+  root.addEventListener(
+    "touchend",
+    (e) => {
+      if ((e as TouchEvent).target instanceof HTMLElement) e.preventDefault();
+    },
+    { passive: false }
+  );
 
   // Cleanup
   return () => {
