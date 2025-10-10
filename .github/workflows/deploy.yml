@@ -1,0 +1,73 @@
+# ============================================================
+# File: .github/workflows/deploy.yml
+# Purpose: Build and Deploy the Game to GitHub Pages
+# ------------------------------------------------------------
+# This workflow runs automatically whenever new changes are
+# pushed to the main branch or launched manually.
+#
+# It builds the project using Node.js and Vite, then publishes
+# the finished site to GitHub Pages so anyone can play online.
+#
+# Think of it as the "pack and publish" step - it gathers all
+# the files into a clean, optimized bundle (the dist/ folder)
+# and uploads them to the GitHub Pages hosting service.
+#
+# After completion, the live game is available at:
+#   https://denisecase.github.io/rockfit/
+# ============================================================
+
+name: Deploy to GitHub Pages
+
+on:
+  # Run this workflow whenever the main branch is updated
+  push:
+    branches: [main]
+
+  # Allow running it manually from the GitHub Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: read # Read access to repository content
+  pages: write # Permission to publish to GitHub Pages
+  id-token: write # Required for authentication with Pages
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Get the latest code from the repository
+      - uses: actions/checkout@v5
+
+      # 2. Set up Node.js (the environment Vite needs to build)
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      # 3. Install dependencies listed in package.json
+      - run: npm ci
+
+      # 4. Build the site into a static folder named dist/
+      - run: npm run build
+
+      # 5. Upload the finished dist/ folder as an artifact
+      #    so the next job can deploy it to GitHub Pages.
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  deploy:
+    # This job waits until the build job finishes successfully
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      # The URL of the live site will be visible in the Actions summary
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      # 6. Deploy the previously uploaded dist/ folder to Pages
+      #    v4 is the current stable version of the deploy action.
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,157 @@
+/* ---------- index.css: Base layout and colors ----------
+   This CSS file controls overall layout, colors, and fonts.
+   Adjust colors and font-family as you like.
+   Avoid changing dimensions unless you know and test the layout effect.
+   NOTE: The game grid (canvas) background is PAINTED IN CODE, not by CSS.
+         To change canvas background color, edit the fill color
+         (look for ctx.fillStyle)
+         in:
+           - src/systems/renderer.ts  (main game canvas)
+           - src/ui/hud.ts            (Next preview canvas)
+*/
+
+/* ---------- Assign Some Color variables (tweak these) ---------- */
+:root {
+  --page-bg: #505050; /* page background */
+  --page-text: #eeeeee; /* default text color */
+
+  --canvas-bg: #111111; /* used by JS fills in renderer/hud */
+  --canvas-border: #888888;
+
+  --grid-stroke: rgba(255, 255, 255, 0.06);
+
+  --panel-bg: #6b6b6b;
+  --panel-border: #333333;
+
+  --accent: #6fa8dc; /* accent color (links, highlights) */
+  --overlay-bg: rgba(0, 0, 0, 0.6);
+  --overlay-text: #ffffff;
+}
+
+/* ---------- Base web page ---------- */
+
+html,
+body {
+  margin: 0; /* keep 0 for full-screen canvas */
+  background: var(--page-bg); /* page background color (safe to adjust) */
+  color: var(--page-text); /* default text color (safe to adjust for contrast) */
+  height: 100%;
+  font-family:
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Arial,
+    sans-serif;
+}
+
+/* ---------- Main game area layout ----------
+   The game uses a 2-column grid:
+   left = main canvas, right = side panel.
+   Avoid changing display type or grid-template-columns.
+    */
+.wrap {
+  display: grid;
+  grid-template-columns: auto 180px; /* set side panel width */
+  gap: 12px; /* space between game and side panel */
+  height: 100vh; /* fill full window vertical height */
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- Game board ----------
+   This is the main play area canvas.
+   Do not change width/height here - controlled by HTML attributes.
+   NOTE: The canvas background color is filled in JS.
+   Changing background here won't show unless you remove
+   the JS fill in src/systems/renderer.ts.
+*/
+
+canvas {
+  background: #444444; /* purely decorative since JS paints */
+  border: 1px solid var(--canvas-border); /* change game area border size, type, and color */
+}
+
+/* ---------- Side panel layout ----------
+   Displays score, next piece, and controls.
+   Adjust padding and gap spacing.
+*/
+
+#side {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+}
+
+/* ---------- Information panels ----------
+   Each block on the right side (Status, Next, Controls).
+   Safely change background and border colors.
+   Avoid altering display or font-size drastically.
+*/
+
+.panel {
+  background: var(--panel-bg); /* change panel background color */
+  border: 1px solid var(--panel-border); /* change panel border size, type, and color */
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* ---------- Section titles ----------
+   Used in each panel header (Status, Next, Controls).
+   Change font-weight or spacing for style preference.
+*/
+
+.title {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+/* ---------- Next piece preview canvas ----------
+   Displays the upcoming piece.
+   NOTE: Its background is also filled in JS (src/ui/hud.ts).
+   Do not change width/height - they are set in HTML for proper scaling.
+*/
+
+#next {
+  width: 150px; /* do not change - set in HTML for proper scaling */
+  height: 150px; /* do not change - set in HTML for proper scaling */
+  background: #222; /* purely decorative since JS paints */
+  border: 1px solid #444;
+}
+
+/* ---------- Overlay (Pause / Game Over) ----------
+   Covers the screen when the game is paused or over.
+   You can safely change color, opacity, or font-size.
+   Do not remove "position: fixed" or "display: flex" - required for centering.
+*/
+
+#overlay {
+  position: fixed; /* do not change - required to cover full screen */
+  inset: 0;
+  background: var(--overlay-bg); /* change overlay background color/opacity */
+  color: var(--overlay-text); /* change overlay text color */
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  text-align: center;
+}
+
+/* This CSS class shows the overlay when active.
+   Do not remove or rename - game logic toggles it.
+*/
+
+#overlay.show {
+  display: flex;
+}
+
+/* ---------- Small text (controls)----------
+   Used for control instructions.
+   You can change font-size or opacity for readability.
+*/
+
+.small {
+  font-size: 14px;
+  opacity: 0.9;
+}

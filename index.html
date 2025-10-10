@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>RockFit</title>
+    <meta
+      name="description"
+      content="A learner-friendly falling-blocks game built with TypeScript and HTML5 Canvas."
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+
+  <body>
+    <div class="wrap">
+      <canvas id="game" width="300" height="600"></canvas>
+      <div id="side">
+        <div class="panel">
+          <div class="title">Status</div>
+          <div id="hud">Score: 0 | Level: 1 | Lines: 0</div>
+        </div>
+        <div class="panel">
+          <div class="title">Next</div>
+          <canvas id="next" width="150" height="150"></canvas>
+        </div>
+        <div class="panel">
+          <div class="title">Controls</div>
+          <div class="small">
+            Arrow Left/Right: move<br />Arrow Up: rotate<br />Arrow Down: soft drop<br />Space: hard
+            drop<br />P: pause/resume<br />R: restart
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="overlay"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
