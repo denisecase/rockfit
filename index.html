@@ -5,7 +5,7 @@
   <meta charset="utf-8" />
   <title>RockFit</title>
   <meta name="description" content="A learner-friendly falling-blocks game built with TypeScript and HTML5 Canvas." />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="stylesheet" href="./index.css" />
   <link rel="icon" type="image/png" href="./favicon.png" sizes="192x192" />
@@ -38,11 +38,28 @@
 
   <div id="overlay"></div>
 
+  <!-- Touch Controls (shown on small screens) -->
+  <div id="touch" class="touchbar" aria-label="Touch controls" role="group">
+    <button data-action="left" class="btn" aria-label="Move left">⬅️</button>
+    <div class="btn-col">
+      <button data-action="rotate" class="btn" aria-label="Rotate">⬆️</button>
+      <button data-action="down" class="btn" aria-label="Soft drop">⬇️</button>
+    </div>
+    <button data-action="right" class="btn" aria-label="Move right">➡️</button>
+
+    <div class="btn-spacer"></div>
+
+    <button data-action="hard" class="btn" aria-label="Hard drop (Space)">⏬</button>
+    <button data-action="pause" class="btn" aria-label="Pause / Resume">⏸️</button>
+    <button data-action="restart" class="btn" aria-label="Restart">🔄</button>
+  </div>
+
+
   <!-- Footer -->
-  <footer id="footer">
+  <footer id="footer" aria-label="Project links and build info">
     <span>RockFit:</span>
-    <a href="https://denisecase.github.io/rockfit/" target="_blank">Site</a> |
-    <a href="https://github.com/denisecase/rockfit" target="_blank">Source</a>
+    <a href="https://denisecase.github.io/rockfit/" target="_blank" rel="noopener">Site</a> |
+    <a href="https://github.com/denisecase/rockfit" target="_blank" rel="noopener">Source</a>
     <span id="version"></span>
   </footer>
 

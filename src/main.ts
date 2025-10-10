@@ -18,6 +18,7 @@ import { render } from "./systems/renderer";
 import { updateHUD } from "./ui/hud";
 import { speedForLevel } from "./kit/scoring";
 import { installKeyboard } from "./systems/input";
+import { installTouchControls } from "./systems/touch";
 
 // Grab DOM elements
 const gameCanvas = document.getElementById("game") as HTMLCanvasElement | null;
@@ -50,6 +51,10 @@ const setState = (next: GameState) => {
 
 // Mount the listener; it returns a cleanup function if needed
 const disposeKeyboard = installKeyboard(getState, setState);
+
+// Touch (mobile)
+const touchRoot = document.getElementById("touch");
+installTouchControls(touchRoot, getState, setState);
 
 // 3) Game loop (gravity / drop). requestAnimationFrame + a timer.
 let lastTime = performance.now();

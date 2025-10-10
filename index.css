@@ -26,6 +26,9 @@
   --accent: #6fa8dc; /* accent color (links, highlights) */
   --overlay-bg: rgba(0, 0, 0, 0.6);
   --overlay-text: #ffffff;
+
+  --touchbar-height: 74px; /* matches min height + padding */
+  --footer-height: 36px; /* footer visual height */
 }
 
 /* ---------- Base web page ---------- */
@@ -48,6 +51,8 @@ body {
    The game uses a 2-column grid:
    left = main canvas, right = side panel.
    Avoid changing display type or grid-template-columns.
+   Mobile: Give the play area a little bottom room so the bar doesn't overlap it
+
     */
 .wrap {
   display: grid;
@@ -56,6 +61,7 @@ body {
   height: 100vh; /* fill full window vertical height */
   align-items: center;
   justify-content: center;
+  padding-bottom: calc(var(--touchbar-height) + var(--footer-height));
 }
 
 /* ---------- Game board ----------
@@ -156,19 +162,65 @@ canvas {
   opacity: 0.9;
 }
 
+/* ---------- Touch controls (mobile): stay above footer ---------- */
+.touchbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--footer-height) + env(safe-area-inset-bottom));
+  padding: 2px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto repeat(3, auto);
+  gap: 4px;
+  align-items: center;
+  background: var(--panel-bg);
+  border-top: 1px solid var(--panel-border);
+  z-index: 100; /* above footer */
+}
 
-/* ---------- Footer ---------- */
+.touchbar .btn {
+  min-width: 48px;
+  min-height: 48px;
+  padding: 8px 8px;
+  font-size: 18px;
+  line-height: 1;
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+  background: #2b2b2b;
+  color: var(--page-text);
+}
+
+.touchbar .btn:active {
+  transform: translateY(1px);
+  filter: brightness(1.1);
+}
+
+.touchbar .btn-col {
+  display: grid;
+  gap: 8px;
+}
+
+.touchbar .btn-spacer {
+  width: 8px;
+}
+
+/* ---------- Footer: bottom-most, safe area padding, visible under touchbar ---------- */
 footer {
-  text-align: center;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0; /* <- bottom-most */
+  height: var(--footer-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   font-size: 14px;
-  padding: 8px 0;
   background: var(--panel-bg);
   color: var(--page-text);
   border-top: 1px solid var(--panel-border);
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
+  padding-bottom: env(safe-area-inset-bottom); /* iOS notch */
+  z-index: 90; /* below touchbar */
 }
 
 footer a {
@@ -179,4 +231,14 @@ footer a {
 
 footer a:hover {
   text-decoration: underline;
+}
+
+/* On wider screens (hide touchbar), only reserve footer height */
+@media (min-width: 900px) {
+  .touchbar {
+    display: none;
+  }
+  .wrap {
+    padding-bottom: var(--footer-height);
+  }
 }

@@ -23,6 +23,10 @@ Initial Features:
 
 ## Controls
 
+You can play **RockFit** using a keyboard or by tapping on-screen buttons (on phones and tablets).
+
+### Keyboard Controls
+
 | Key          | Action         |
 | ------------ | -------------- |
 | Left / Right | Move piece     |
@@ -31,6 +35,26 @@ Initial Features:
 | Space        | Hard drop      |
 | P            | Pause / Resume |
 | R            | Restart game   |
+
+### Touch Controls (Mobile & Tablet)
+
+When opened on a phone or tablet, **RockFit** shows a touch bar along the bottom of the screen with large, easy-to-tap buttons:
+
+| Button | Action |
+| ------- | ------- |
+| ⟵ / ⟶ | Move left / right |
+| ⟳ | Rotate piece |
+| ⟱ | Soft drop (move down slowly) |
+| ⏬ | Hard drop (instant) |
+| ⏯ | Pause / Resume |
+| ↺ | Restart game |
+
+> The touch bar hides automatically on large screens but always appears on mobile.
+> You can modify its look and feel in `index.css` under **“Touch controls (mobile)”**.
+
+> **Play on mobile:**
+> RockFit is installable as a Progressive Web App (PWA).
+> On Android (Chrome) or iOS (Safari), tap **“Add to Home Screen”** to install and play full-screen.
 
 ## How the Game Logic is Organized
 
