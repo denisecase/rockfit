@@ -27,6 +27,16 @@ const hudEl = document.getElementById("hud") as HTMLDivElement | null;
 const overlayEl = document.getElementById("overlay") as HTMLDivElement | null;
 const footerEl = document.getElementById("version");
 
+// ---- Secret Assist (PageUp/PageDown) -----------------------
+// 0..3 where 0 = normal speed, 3 = slowest
+const assist = {
+  level: 0 as 0 | 1 | 2 | 3,
+  // how much to slow gravity (multiply the drop interval)
+  slowFactor: [1.0, 1.5, 2.0, 2.5] as const, // <- tuple
+  // how much to scale scoring when slowed (multiply score delta)
+  scoreMul: [1.0, 0.8, 0.6, 0.5] as const, // <- tuple
+};
+
 if (footerEl) {
   const updated = new Date(document.lastModified).toISOString().split("T")[0];
   footerEl.textContent = ` • Version: ${packageInfo.version} • Updated: ${updated}`;
@@ -36,6 +46,20 @@ if (!gameCanvas || !nextCanvas || !hudEl || !overlayEl) {
   throw new Error(
     "Missing required DOM elements. Ensure #game, #next, #hud, and #overlay exist in index.html."
   );
+}
+
+function bumpAssist(delta: -1 | 1) {
+  const prev = assist.level;
+  let next = (prev + delta) as 0 | 1 | 2 | 3;
+  if (next < 0) next = 0;
+  if (next > 3) next = 3;
+  assist.level = next;
+  // optional: tiny toast/log
+  console.log(
+    `[RockFit] Assist level: ${assist.level}/3 (slow x${assist.slowFactor[assist.level]})`
+  );
+  // immediate HUD refresh
+  updateHUD(hudEl!, overlayEl!, state);
 }
 
 // 1) Create state and spawn the first piece
@@ -74,6 +98,17 @@ const setState = (next: GameState) => {
 // ---- Input (keyboard + touch) ---------------------------------------------
 const disposeKeyboard = installKeyboard(getState, setState);
 
+// Secret assist keys: PageDown = slower, PageUp = faster
+window.addEventListener("keydown", (e) => {
+  if (e.code === "PageDown") {
+    bumpAssist(1); // slower (up to 3)
+    e.preventDefault();
+  } else if (e.code === "PageUp") {
+    bumpAssist(-1); // faster (down to 0)
+    e.preventDefault();
+  }
+});
+
 // Touch is optional — safely no-op if #touch missing
 const touchRoot = document.getElementById("touch") as HTMLElement | null;
 try {
@@ -95,7 +130,9 @@ function loop(now: number) {
 
     // Guard against bad config: clamp to a sane default if needed (ms/frame).
     const cfg = speedForLevel(state.level);
-    const dropEvery = Math.max(60, Number.isFinite(cfg as number) ? (cfg as number) : 800);
+    const baseDrop = Math.max(60, Number.isFinite(cfg as number) ? (cfg as number) : 800);
+    // slow gravity by assist factor
+    const dropEvery = Math.floor(baseDrop * assist.slowFactor[assist.level]);
 
     // Debug once if cfg looked bad
     if (!Number.isFinite(cfg as number)) {
@@ -108,11 +145,24 @@ function loop(now: number) {
     // Apply as many drops as we owe
     while (dropAccum >= dropEvery) {
       const before = state;
+      const beforeScore = before.score;
+
       state = move(state, 0, 1); // try to drop by one row
       dropAccum -= dropEvery;
 
       if (state !== before) {
-        // state changed (moved, locked, cleared, or spawned)
+        // If points were awarded inside transitions (line clears, etc.),
+        // scale the delta when assist is active.
+        const delta = state.score - beforeScore;
+        if (delta > 0) {
+          const mul = assist.scoreMul[assist.level];
+          // Only change if multiplier != 1
+          if (mul !== 1) {
+            const adjusted = beforeScore + Math.round(delta * mul);
+            // Keep immutability vibe
+            state = { ...state, score: adjusted };
+          }
+        }
         render(gameCanvas!, nextCanvas!, state);
         updateHUD(hudEl!, overlayEl!, state);
       } else {
