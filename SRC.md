@@ -1,11 +1,10 @@
 # What’s in the `src` folder
 
 This project splits shared, reusable utilities into **`src/kit/`** and keeps game-specific code in **`src/game/`**, with small **`systems/`** (engine helpers) and **`ui/`** "heads up display" (HUD) layers.
-Both RockFit and RockSwap can reuse everything under `src/kit/`.
 
 ---
 
-## Shared kit (reusable across games)
+## Main kit logic
 
 - [`src/kit/types.ts`](./src/kit/types.ts) – shared types
   Common primitives: `Cell`, `Grid`, `Shape`, `Point`, `ActivePiece { row, col, shape }`, `GameState`, `HUDData`, `GameConfig`, `StateUpdater`.

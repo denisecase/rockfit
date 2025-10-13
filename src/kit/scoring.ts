@@ -2,8 +2,8 @@
 // File: src/kit/scoring.ts
 // Purpose: Manage game score and level logic
 // ------------------------------------------------------------
-// Provides simple scoring and speed progression for RockFit
-// and RockSwap. Designed for clarity, not realism.
+// Provides simple scoring and speed progression for RockFit.
+// Designed for clarity, not realism.
 // ============================================================
 
 /**

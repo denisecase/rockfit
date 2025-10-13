@@ -1,11 +1,10 @@
 // ============================================================
 // File: src/kit/types.ts
-// Purpose: Shared type definitions for the RockFit / RockSwap kit
+// Purpose: Shared type definitions for the RockFit kit
 // ------------------------------------------------------------
 // These types describe the basic grid, shapes, and coordinates
-// used by both RockFit and RockSwap.
-// Keep these simple, well-documented, and consistent.
-// Each is reusable across grid, rotation, scoring, and transitions.
+// used by RockFit.
+// Keep these simple and well-documented.
 // ============================================================
 
 /**

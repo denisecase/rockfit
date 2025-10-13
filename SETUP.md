@@ -23,13 +23,13 @@ If you want to change gameplay, scoring logic, or transitions, you'll probably w
 ## 2. Get a Copy on Your Machine
 
 Log in to GitHub.
-Go to github.com/denisecase/rockswap. Click "Fork" to copy the repo into your GitHub account.
-Clone your new rockswap repo down to your machine and open in VS Code using the following commands.
+Go to github.com/denisecase/rockfit. Click "Fork" to copy the repo into your GitHub account.
+Clone your new rockfit repo down to your machine and open in VS Code using the following commands.
 Open terminal.
 
 ```
 git clone https://github.com/denisecase/rockfit.git
-cd rockswap
+cd rockfit
 code .
 ```
 
@@ -54,3 +54,29 @@ npm run dev
 ```
 
 ---
+
+## Pre-Release Verification
+
+```shell
+npm install
+npm audit fix --force
+npm run format
+npm run dev
+```
+
+Open <http://localhost:5177>.
+
+Final commit and tag:
+
+```shell
+git add .
+git commit -m "Prep vx.y.z"
+git push -u origin main
+```
+
+Verify CI & Docs Actions pass on GitHub, then:
+
+```shell
+git tag vx.y.z -m "x.y.z"
+git push origin vx.y.z
+```

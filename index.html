@@ -8,10 +8,29 @@
       content="A learner-friendly falling-blocks game built with TypeScript and HTML5 Canvas."
     />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#111111" />
+    <meta name="color-scheme" content="dark light" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="stylesheet" href="./index.css" />
-    <link rel="icon" type="image/png" href="./favicon.png" />
+    <link rel="icon" type="image/png" href="./favicon.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-7E7K6TMVHB"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-7E7K6TMVHB");
+      gtag("consent", "default", {
+        ad_storage: "denied",
+        analytics_storage: "granted"
+      });
+      gtag("event", "page_view", {
+        page_path: "/rockfit/",
+        game_name: "RockFit"
+      });
+    </script>
   </head>
 
   <body>
@@ -41,18 +60,29 @@
 
     <!-- Touch Controls (shown on small screens) -->
     <div id="touch" class="touchbar" aria-label="Touch controls" role="group">
-      <button data-action="left" class="btn" aria-label="Move left">⬅️</button>
+      <button data-action="left" class="btn" type="button" aria-label="Move left">⬅️</button>
       <div class="btn-col">
-        <button data-action="rotate" class="btn" aria-label="Rotate">⬆️</button>
-        <button data-action="down" class="btn" aria-label="Soft drop">⬇️</button>
+        <button data-action="rotate" class="btn" type="button" aria-label="Rotate">⬆️</button>
+        <button data-action="down" class="btn" type="button" aria-label="Soft drop">⬇️</button>
       </div>
-      <button data-action="right" class="btn" aria-label="Move right">➡️</button>
+      <button data-action="right" class="btn" type="button" aria-label="Move right">➡️</button>
 
       <div class="btn-spacer"></div>
 
-      <button data-action="hard" class="btn" aria-label="Hard drop (Space)">⏬</button>
-      <button data-action="pause" class="btn" aria-label="Pause / Resume">⏸️</button>
-      <button data-action="restart" class="btn" aria-label="Restart">🔄</button>
+      <button data-action="hard" class="btn" type="button" aria-label="Hard drop (Space)">
+        ⏬
+      </button>
+      <button
+        data-action="pause"
+        class="btn"
+        type="button"
+        aria-label="Pause"
+        aria-pressed="false"
+        title="Pause"
+      >
+        ⏸️
+      </button>
+      <button data-action="restart" class="btn" type="button" aria-label="Restart">🔄</button>
     </div>
 
     <!-- Footer -->
@@ -64,12 +94,5 @@
     </footer>
 
     <script type="module" src="./src/main.ts"></script>
-    <script>
-      // Dynamically set version + date if available
-      const version = "0.0.1";
-      const updated = "2025-10-10";
-      document.getElementById("version").textContent =
-        ` • Version: ${version} • Updated: ${updated}`;
-    </script>
   </body>
 </html>

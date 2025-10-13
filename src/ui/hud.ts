@@ -38,10 +38,10 @@ export function updateHUD(hudEl: HTMLElement, overlayEl: HTMLElement, state: Gam
 
   // ---- Overlay ----
   if (state.gameOver) {
-    overlayEl.textContent = "Game Over — press R to restart";
+    overlayEl.textContent = "Game Over: press R to restart";
     overlayEl.classList.add("show");
   } else if (state.paused) {
-    overlayEl.textContent = "Paused — press P to resume";
+    overlayEl.textContent = "Paused: Press P to resume";
     overlayEl.classList.add("show");
   } else {
     overlayEl.textContent = "";

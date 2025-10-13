@@ -1,10 +1,24 @@
 import { defineConfig } from "vite";
+import packageJson from "./package.json";
+
 export default defineConfig({
+  define: {
+    // Inject version + timestamp for unique builds
+    "import.meta.env.VITE_BUILD_ID": JSON.stringify(`${packageJson.version}-${Date.now()}`)
+  },
   json: {
     namedExports: true,
     stringify: false
   },
   server: { port: 5177 },
-  build: { target: "es2020" },
-  base: "/rockfit/"
+  base: "/rockfit/",
+  build: {
+    target: "es2020",
+    minify: "esbuild",
+    terserOptions: undefined,
+    cssMinify: true
+  },
+  esbuild: {
+    drop: ["console", "debugger"]
+  }
 });

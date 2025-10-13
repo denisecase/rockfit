@@ -61,7 +61,7 @@ body {
   height: 100vh; /* fill full window vertical height */
   align-items: center;
   justify-content: center;
-  padding-bottom: calc(var(--touchbar-height) + var(--footer-height));
+  padding-bottom: var(--footer-height); /* reserve footer height */
 }
 
 /* ---------- Game board ----------
@@ -113,6 +113,13 @@ canvas {
   margin-bottom: 6px;
 }
 
+/* ---------- Buttons ----------
+Make buttons feel instant on mobile */
+.btn {
+  touch-action: manipulation; /* no double-tap delay */
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* ---------- Next piece preview canvas ----------
    Displays the upcoming piece.
    NOTE: Its background is also filled in JS (src/ui/hud.ts).
@@ -142,6 +149,8 @@ canvas {
   justify-content: center;
   font-size: 24px;
   text-align: center;
+  pointer-events: none; /* unless you want it clickable */
+  z-index: 50; /* above game but below touchbar/footer */
 }
 
 /* This CSS class shows the overlay when active.
@@ -150,6 +159,12 @@ canvas {
 
 #overlay.show {
   display: flex;
+}
+
+/* Ensure canvas isn't above overlay */
+#game {
+  position: relative;
+  z-index: 5;
 }
 
 /* ---------- Small text (controls)----------
@@ -163,25 +178,38 @@ canvas {
 }
 
 /* ---------- Touch controls (mobile): stay above footer ---------- */
+/* Hidden by default */
 .touchbar {
+  display: none;
+}
+
+/* Show + layout when JS adds `body.touch` */
+body.touch .touchbar {
+  display: grid;
   position: fixed;
   left: 0;
   right: 0;
   bottom: calc(var(--footer-height) + env(safe-area-inset-bottom));
-  padding: 2px;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr auto repeat(3, auto);
-  gap: 4px;
+  z-index: 100;
+
+  /* one row; every button gets a column */
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(44px, 1fr);
   align-items: center;
+  justify-items: center;
+
+  gap: 6px;
+  padding: 2px;
+
   background: var(--panel-bg);
   border-top: 1px solid var(--panel-border);
-  z-index: 100; /* above footer */
 }
 
-.touchbar .btn {
-  min-width: 48px;
-  min-height: 48px;
-  padding: 8px 8px;
+/* Buttons */
+body.touch .touchbar .btn {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px;
   font-size: 18px;
   line-height: 1;
   border-radius: 8px;
@@ -190,18 +218,19 @@ canvas {
   color: var(--page-text);
 }
 
-.touchbar .btn:active {
+body.touch .touchbar .btn:active {
   transform: translateY(1px);
   filter: brightness(1.1);
 }
 
-.touchbar .btn-col {
-  display: grid;
-  gap: 8px;
+/* If the touchbar is visible, reserve space below the game area */
+body.touch .wrap {
+  padding-bottom: calc(var(--touchbar-height) + var(--footer-height));
 }
 
-.touchbar .btn-spacer {
-  width: 8px;
+/* Keep pause button snappy on touch */
+button[data-action="pause"] {
+  touch-action: manipulation;
 }
 
 /* ---------- Footer: bottom-most, safe area padding, visible under touchbar ---------- */
@@ -233,12 +262,101 @@ footer a:hover {
   text-decoration: underline;
 }
 
+/* Media queries for responsive layout
+
 /* On wider screens (hide touchbar), only reserve footer height */
 @media (min-width: 900px) {
-  .touchbar {
-    display: none;
+  body.touch .touchbar {
+    display: none !important;
   }
   .wrap {
     padding-bottom: var(--footer-height);
+  }
+}
+
+/* ---------- Mobile Layout: Compact single-column ---------- */
+@media (max-width: 600px) {
+  /* Collapse to one column */
+  .wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100dvh; /* dynamic viewport height for iOS */
+    padding-bottom: var(--touchbar-height);
+    gap: 4px;
+  }
+
+  /* Hide bulky side panels EXCEPT the Next preview */
+  #side {
+    display: none !important;
+  }
+
+  /* Show ONLY the Next canvas on mobile, positioned absolutely */
+  #side .panel:has(#next) {
+    display: block !important;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    z-index: 10;
+  }
+
+  #side .panel:has(#next) .title {
+    display: none; /* hide "Next" label on mobile */
+  }
+
+  /* Canvas dominates available space */
+  #game {
+    width: 100vw;
+    height: auto;
+    aspect-ratio: 1 / 2; /* 300x600 scaling */
+    max-height: calc(100dvh - var(--touchbar-height) - 4px);
+    border: 1px solid var(--canvas-border);
+    background: #222;
+  }
+
+  /* Small "Next" preview overlaid top-right */
+  #next {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 80px !important;
+    height: 80px !important;
+    background: #222;
+    border: 1px solid #555;
+    z-index: 10;
+  }
+
+  /* Overlay relative to .wrap so #next can sit above the game */
+  .wrap {
+    position: relative;
+  }
+
+  /* Make sure overlay covers full viewport when active */
+  #overlay {
+    font-size: 20px;
+    padding: 0 12px;
+  }
+
+  /* Footer optional on tiny screens — hide if shorter than ~670px */
+  @media (max-height: 670px) {
+    footer {
+      display: none;
+    }
+  }
+
+  /* Touchbar: reduce padding slightly for smaller screens */
+  .touchbar {
+    gap: 3px;
+    padding: 1px;
+  }
+
+  .touchbar .btn {
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 16px;
   }
 }
