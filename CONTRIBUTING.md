@@ -25,7 +25,7 @@ To **run or test the game locally**, see setup instructions below.
 
 - **Want to change web page background colors?** Edit `index.css` directly in the browser.
 - **Want to change right-side HUD text or overlay messages?** Edit `src/ui/hud.ts`.
-- **Want to change game colors or canvas backgrounds?** Edit `src/systems/renderer.ts` and `src/ui/hud.ts` (both repaint canvases).
+- **Want to change rock colors?** Edit `src/kit/palettes.ts`.
 - **Want to change scoring or level speed?** Edit `src/kit/scoring.ts`.
 - **Want to add/edit shapes or how they are chosen (randomization)?** Edit `src/game/pieces.ts`.
 

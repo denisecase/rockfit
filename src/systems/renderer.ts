@@ -8,118 +8,110 @@
 
 import { GameState } from "../game/state";
 import { Shape } from "../kit/types";
+import { colorFor } from "../kit/palettes";
 
 const GRID_BACKGROUND_COLOR = "#111";
 const FAINT_GRID_COLOR = "rgba(255,255,255,0.06)";
 
-// Colors for filled cells (index 0 = empty)
-const COLORS = [
-  "#000000",
-  "#2f4f4f",
-  "#556b2f",
-  "#8b4513",
-  "#708090",
-  "#b8860b",
-  "#7b3f00",
-  "#1e90ff"
-] as const;
-
-// Always return a valid color string
-function colorFor(value: number): string {
-  // 0 means empty; non-zero indexes into COLORS with clamp
-  if (!Number.isFinite(value) || value <= 0) return COLORS[0];
-  const idx = Math.min(value, COLORS.length - 1);
-  return COLORS[idx] ?? COLORS[0];
-}
-
 /**
- * Draw a shape matrix to a 2D canvas at a grid position.
- */
-function drawShape(
-  ctx: CanvasRenderingContext2D,
-  shape: Shape,
-  gx: number,
-  gy: number,
-  cell: number
-) {
-  const shapeRows = shape.length;
-  if (shapeRows === 0) return;
-  const shapeCols = shape[0]!.length;
-
-  for (let r = 0; r < shapeRows; r++) {
-    const shapeRow = shape[r]!;
-    for (let c = 0; c < shapeCols; c++) {
-      const v = shapeRow[c] ?? 0;
-      if (v) {
-        const x = (gx + c) * cell;
-        const y = (gy + r) * cell;
-        ctx.fillStyle = colorFor(v);
-        ctx.fillRect(x, y, cell, cell);
-
-        // subtle bevel
-        ctx.strokeStyle = GRID_BACKGROUND_COLOR;
-        ctx.strokeRect(x + 0.5, y + 0.5, cell - 1, cell - 1);
-      }
-    }
-  }
-}
-
-/**
- * Render the full game frame.
+ * Draw the full game state: grid, active piece, and "next" preview
  */
 export function render(
   gameCanvas: HTMLCanvasElement,
   nextCanvas: HTMLCanvasElement,
   state: GameState
 ): void {
-  const gctx = gameCanvas.getContext("2d");
-  const nctx = nextCanvas.getContext("2d");
-  if (!gctx || !nctx) return;
+  drawGrid(gameCanvas, state);
+  // Next preview is now drawn in updateHUD for consistency
+}
 
-  // --- Guard: empty or malformed grid ---
+/**
+ * Draw the grid and the active piece
+ */
+function drawGrid(canvas: HTMLCanvasElement, state: GameState): void {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
   const rows = state.grid.length;
-  if (rows === 0) return;
-  const firstRow = state.grid[0];
-  if (!firstRow) return;
-  const cols = firstRow.length;
-  if (cols === 0) return;
+  const cols = state.grid[0]?.length ?? 0;
+  if (rows === 0 || cols === 0) return;
 
-  // Compute cell size from canvas
-  const cell = Math.floor(Math.min(gameCanvas.width / cols, gameCanvas.height / rows)) || 1;
+  const cellW = canvas.width / cols;
+  const cellH = canvas.height / rows;
 
-  // Clear background
-  gctx.fillStyle = GRID_BACKGROUND_COLOR;
-  gctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+  // Clear + background
+  ctx.fillStyle = GRID_BACKGROUND_COLOR;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Draw board cells
+  // Draw faint grid lines
+  ctx.strokeStyle = FAINT_GRID_COLOR;
+  ctx.lineWidth = 1;
+  for (let r = 0; r <= rows; r++) {
+    const y = r * cellH;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width, y);
+    ctx.stroke();
+  }
+  for (let c = 0; c <= cols; c++) {
+    const x = c * cellW;
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, canvas.height);
+    ctx.stroke();
+  }
+
+  // Draw locked cells
   for (let r = 0; r < rows; r++) {
-    const rowArr = state.grid[r]!;
     for (let c = 0; c < cols; c++) {
-      const v = rowArr[c] ?? 0;
-      const x = c * cell;
-      const y = r * cell;
-
-      if (v) {
-        gctx.fillStyle = colorFor(v);
-        gctx.fillRect(x, y, cell, cell);
-        gctx.strokeStyle = GRID_BACKGROUND_COLOR;
-        gctx.strokeRect(x + 0.5, y + 0.5, cell - 1, cell - 1);
-      } else {
-        // faint grid
-        gctx.strokeStyle = FAINT_GRID_COLOR;
-        gctx.strokeRect(x + 0.5, y + 0.5, cell - 1, cell - 1);
+      const val = state.grid[r]?.[c] ?? 0;
+      if (val > 0) {
+        drawCell(ctx, c, r, cellW, cellH, val);
       }
     }
   }
 
-  // Draw active piece (row/col → x/y)
+  // Draw active piece
   if (state.active) {
-    drawShape(gctx, state.active.shape, state.active.col, state.active.row, cell);
-  }
+    const shape = state.active.shape;
+    const offsetRow = state.active.row;
+    const offsetCol = state.active.col;
 
-  // Clear and paint the "Next" canvas background (preview drawn by HUD)
-  nctx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
-  nctx.fillStyle = GRID_BACKGROUND_COLOR;
-  nctx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
-  // Next preview is handled in src/ui/hud.ts to avoid coupling to piece defs.
+    for (let r = 0; r < shape.length; r++) {
+      for (let c = 0; c < shape[r]!.length; c++) {
+        const val = shape[r]![c] ?? 0;
+        if (val > 0) {
+          const gridRow = offsetRow + r;
+          const gridCol = offsetCol + c;
+          if (gridRow >= 0 && gridRow < rows && gridCol >= 0 && gridCol < cols) {
+            drawCell(ctx, gridCol, gridRow, cellW, cellH, val);
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Draw a single colored cell with border
+ */
+function drawCell(
+  ctx: CanvasRenderingContext2D,
+  col: number,
+  row: number,
+  cellW: number,
+  cellH: number,
+  value: number
+): void {
+  const x = col * cellW;
+  const y = row * cellH;
+
+  // Fill with palette color
+  ctx.fillStyle = colorFor(value);
+  ctx.fillRect(x, y, cellW, cellH);
+
+  // Draw border
+  ctx.strokeStyle = "#0b0b0b";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(x + 0.5, y + 0.5, cellW - 1, cellH - 1);
 }

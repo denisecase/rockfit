@@ -10,13 +10,15 @@ console.log("[RockFit] main.ts loaded");
 import packageInfo from "../package.json";
 
 import { newGameState, GameState } from "./game/state";
-import { spawnPiece, move, togglePause } from "./game/transitions";
+import { spawnPiece, move, togglePause, restart } from "./game/transitions";
 import { render } from "./systems/renderer";
 import { updateHUD } from "./ui/hud";
-import { speedForLevel } from "./kit/scoring";
+import { speedForLevel, resetCombo } from "./kit/scoring";
 import { installKeyboard } from "./systems/input";
 import { installTouchControls } from "./systems/touch";
 import { bindTouchClassListeners } from "./kit/touch-env";
+import { initPalette, nextPalette } from "./kit/palettes";
+import { loadHighScore, maybeUpdateHighScore, clearHighScore } from "./systems/highscore";
 
 // ---------- Module-scope refs ----------
 let gameCanvas!: HTMLCanvasElement;
@@ -24,17 +26,18 @@ let nextCanvas!: HTMLCanvasElement;
 let hudEl!: HTMLDivElement;
 let overlayEl!: HTMLDivElement;
 let footerEl: HTMLElement | null = null;
+let high = loadHighScore();
 
 let state!: GameState;
 
-// Assist (optional slow/score scaling)
+// Assist (slow/score scaling)
 const assist = {
   level: 0 as 0 | 1 | 2 | 3,
   slowFactor: [1.0, 1.5, 2.0, 2.5] as const,
   scoreMul: [1.0, 0.8, 0.6, 0.5] as const
 };
 
-// ---------- Loop timing (we'll reset these when resuming) ----------
+// ---------- Loop timing (reset these when resuming) ----------
 let lastTime = performance.now();
 let dropAccum = 0;
 
@@ -54,7 +57,7 @@ function initDOM(): void {
 
   if (footerEl) {
     const updated = new Date(document.lastModified).toISOString().split("T")[0];
-    footerEl.textContent = ` • Version: ${packageInfo.version} • Updated: ${updated}`;
+    footerEl.textContent = `| v${packageInfo.version} | ${updated}`;
   }
 
   // Make the canvas keyboard-focusable and focused (critical for keys)
@@ -83,8 +86,17 @@ function initState(): void {
 function applyState(next: GameState): void {
   if (next !== state) {
     state = next;
+
+    // Update high score if current score is higher
+    const prevHigh = high;
+    high = maybeUpdateHighScore(state.score);
+
+    if (high !== prevHigh) {
+      console.log(`[RockFit] NEW HIGH SCORE: ${high}`);
+    }
+
     render(gameCanvas, nextCanvas, state);
-    updateHUD(hudEl, overlayEl, state);
+    updateHUD(hudEl, overlayEl, state, high);
   }
 }
 
@@ -123,8 +135,14 @@ function setPaused(next: boolean): void {
 
   reflectPauseUI(state.paused);
   render(gameCanvas, nextCanvas, state);
-  updateHUD(hudEl, overlayEl, state);
+  updateHUD(hudEl, overlayEl, state, high);
 }
+
+document.getElementById("clear-data")?.addEventListener("click", () => {
+  clearHighScore();
+  high = 0;
+  updateHUD(hudEl, overlayEl, state, high);
+});
 
 function bumpAssist(delta: -1 | 1): void {
   let next = (assist.level + delta) as 0 | 1 | 2 | 3;
@@ -132,13 +150,32 @@ function bumpAssist(delta: -1 | 1): void {
   if (next > 3) next = 3;
   assist.level = next;
   console.log(`[RockFit] Assist ${assist.level}/3 (slow x${assist.slowFactor[assist.level]})`);
-  updateHUD(hudEl, overlayEl, state);
+  updateHUD(hudEl, overlayEl, state, high);
+}
+
+// Cycle to next palette
+function cyclePalette(): void {
+  const palette = nextPalette();
+  console.log(`[RockFit] Theme: ${palette.name}`);
+  render(gameCanvas, nextCanvas, state);
+  updateHUD(hudEl, overlayEl, state, high);
+}
+
+// Restart the game (even when game over)
+function restartGame(): void {
+  console.log("[RockFit] Restarting game...");
+  resetCombo();
+  state = restart(state);
+  lastTime = performance.now();
+  dropAccum = 0;
+  render(gameCanvas, nextCanvas, state);
+  updateHUD(hudEl, overlayEl, state, high);
 }
 
 // ---------- Initial paint ----------
 function initialPaint(): void {
   render(gameCanvas, nextCanvas, state);
-  updateHUD(hudEl, overlayEl, state);
+  updateHUD(hudEl, overlayEl, state, high);
 }
 
 // ---------- Inputs (keyboard + touch + env detection) ----------
@@ -161,12 +198,43 @@ function installInputs(): () => void {
     capture: true
   });
 
-  // 4) Hotkeys: PageUp/PageDown assist, P to pause. Ignore repeats and typing fields.
+  // 4) Clear high score button and restart button
+  const clearBtn = document.getElementById("clear-data");
+  const onClearTap = () => {
+    clearHighScore();
+    high = 0;
+    console.log("[RockFit] High score cleared");
+    updateHUD(hudEl, overlayEl, state, high);
+  };
+
+  const restartBtn = document.querySelector('button[data-action="restart"]');
+  const onRestartTap = (ev: Event) => {
+    ev.preventDefault();
+    (ev as any).stopImmediatePropagation?.();
+    restartGame();
+  };
+  restartBtn?.addEventListener("pointerdown", onRestartTap as EventListener, {
+    passive: false,
+    capture: true
+  });
+
+  clearBtn?.addEventListener("click", onClearTap);
+
+  // 5) Hotkeys: PageUp/PageDown assist, P to pause, C to cycle palette.
+  // Ignore repeats and typing fields.
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.repeat) return;
 
     const t = e.target as HTMLElement | null;
     if (t && (t.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(t.tagName))) return;
+
+    // Handle restart FIRST (works when game over)
+    if (e.code === "KeyR" || e.key?.toLowerCase() === "r") {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      restartGame();
+      return;
+    }
 
     if (e.code === "PageDown") {
       bumpAssist(1);
@@ -180,11 +248,16 @@ function installInputs(): () => void {
       e.preventDefault();
       e.stopImmediatePropagation();
       setPaused(!state.paused);
+    } else if (e.code === "KeyC" || e.key?.toLowerCase() === "c") {
+      // Cycle color palette with C key
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      cyclePalette();
     }
   };
   window.addEventListener("keydown", onKeyDown, { capture: true });
 
-  // 5) Touch controls (safe no-op if #touch missing). Returns a disposer or undefined.
+  // 6) Touch controls (safe no-op if #touch missing). Returns a disposer or undefined.
   const touchRoot = document.getElementById("touch") as HTMLElement | null;
   let disposeTouch: (() => void) | undefined;
   try {
@@ -193,7 +266,7 @@ function installInputs(): () => void {
     console.error("[RockFit] installTouchControls failed:", e);
   }
 
-  // 6) Auto-pause when the tab/app is backgrounded.
+  // 7) Auto-pause when the tab/app is backgrounded.
   const onVis = () => {
     if (document.hidden && !state.paused) setPaused(true);
   };
@@ -205,6 +278,8 @@ function installInputs(): () => void {
     disposeKeyboard?.();
     disposeTouch?.();
     pauseBtn?.removeEventListener("pointerdown", onPauseTap as EventListener);
+    clearBtn?.removeEventListener("click", onClearTap);
+    restartBtn?.removeEventListener("pointerdown", onRestartTap as EventListener);
     window.removeEventListener("keydown", onKeyDown, { capture: true } as any);
     document.removeEventListener("visibilitychange", onVis);
   };
@@ -245,6 +320,14 @@ function startLoop(): void {
           if (delta > 0) {
             const mul = assist.scoreMul[assist.level];
             if (mul !== 1) state = { ...state, score: beforeScore + Math.round(delta * mul) };
+
+            // Update high score if needed
+            const prevHigh = high;
+            high = maybeUpdateHighScore(state.score);
+
+            if (high !== prevHigh) {
+              console.log(`[RockFit] NEW HIGH SCORE: ${high}`);
+            }
           }
           changed = true;
         } else {
@@ -255,7 +338,7 @@ function startLoop(): void {
 
     if (changed) {
       render(gameCanvas, nextCanvas, state);
-      updateHUD(hudEl, overlayEl, state);
+      updateHUD(hudEl, overlayEl, state, high);
     }
 
     requestAnimationFrame(loop);

@@ -11,7 +11,7 @@ import { GameState } from "./state";
 import { PIECES, randomPieceKey, PieceKey } from "./pieces";
 import { collides, place, clearLines } from "../kit/grid";
 import { rotateRight } from "../kit/rotation";
-import { scoreForLines, levelForLines } from "../kit/scoring";
+import { scoreForLines, levelForLines, getCombo, resetCombo } from "../kit/scoring";
 import type { ActivePiece, Shape } from "../kit/types";
 
 const toPoint = (p: Pick<ActivePiece, "row" | "col">) => ({ x: p.col, y: p.row });
@@ -51,12 +51,15 @@ export function move(state: GameState, dx: number, dy: number): GameState {
       const totalLines = state.lines + cleared;
       const newLevel = levelForLines(totalLines);
       const newScore = state.score + scoreForLines(cleared, newLevel);
+      const newCombo = getCombo();
+
       return spawnPiece({
         ...state,
         active: null,
         lines: totalLines,
         level: newLevel,
-        score: newScore
+        score: newScore,
+        combo: newCombo
       });
     }
     return state; // horizontal bump → ignore
@@ -77,7 +80,7 @@ export function rotate(state: GameState): GameState {
   return state;
 }
 
-// --- hard drop (new) ---
+// --- hard drop ---
 
 export function hardDrop(state: GameState): GameState {
   const a = state.active;
@@ -97,13 +100,15 @@ export function hardDrop(state: GameState): GameState {
   const totalLines = state.lines + cleared;
   const newLevel = levelForLines(totalLines);
   const newScore = state.score + scoreForLines(cleared, newLevel);
+  const newCombo = getCombo();
 
   return spawnPiece({
     ...state,
     active: null,
     lines: totalLines,
     level: newLevel,
-    score: newScore
+    score: newScore,
+    combo: newCombo
   });
 }
 
@@ -122,6 +127,7 @@ export function restart(state: GameState): GameState {
       grid: clearedGrid,
       score: 0,
       lines: 0,
+      combo: 0,
       gameOver: false
     })
   };

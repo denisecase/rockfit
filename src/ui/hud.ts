@@ -8,33 +8,35 @@
 
 import { GameState } from "../game/state";
 import { PIECES } from "../game/pieces";
-
-// Add a small local palette + helper (same indexes as renderer)
-const COLORS = [
-  "#000000",
-  "#2f4f4f",
-  "#556b2f",
-  "#8b4513",
-  "#708090",
-  "#b8860b",
-  "#7b3f00",
-  "#1e90ff"
-] as const;
-
-/**Return the color string for a given value */
-function colorFor(v: number): string {
-  if (!Number.isFinite(v) || v <= 0) return COLORS[0];
-  const idx = Math.min(v, COLORS.length - 1);
-  return COLORS[idx] ?? COLORS[0];
-}
+import { colorFor, getCurrentPaletteName } from "../kit/palettes";
 
 /**
  * Update the main scoreboard line and overlay visibility,
  * and draw the "Next" piece preview (if the canvas exists).
  */
-export function updateHUD(hudEl: HTMLElement, overlayEl: HTMLElement, state: GameState): void {
-  // ---- Score line ----
-  hudEl.textContent = `Score: ${state.score} | Level: ${state.level} | Lines: ${state.lines}`;
+export function updateHUD(
+  hudEl: HTMLElement,
+  overlayEl: HTMLElement,
+  state: GameState,
+  highScore: number = 0
+): void {
+  // ---- Score line with combo ----
+  let scoreText = `Score: ${state.score} | Level: ${state.level} | Lines: ${state.lines}`;
+
+  // Add combo to the string if active
+  if (state.combo > 1) {
+    scoreText += ` | 🔥${state.combo}x COMBO`;
+  }
+
+  // Add theme name
+  scoreText += ` | Theme: ${getCurrentPaletteName()}`;
+
+  // Add high score
+  if (highScore > 0) {
+    scoreText += ` | High Score: ${highScore}`;
+  }
+
+  hudEl.textContent = scoreText;
 
   // ---- Overlay ----
   if (state.gameOver) {
@@ -48,7 +50,7 @@ export function updateHUD(hudEl: HTMLElement, overlayEl: HTMLElement, state: Gam
     overlayEl.classList.remove("show");
   }
 
-  // ---- "Next" preview (optional) ----
+  // ---- "Next" preview----
   const nextCanvas = document.getElementById("next") as HTMLCanvasElement | null;
   if (!nextCanvas) return;
   const ctx = nextCanvas.getContext("2d");
@@ -96,7 +98,7 @@ export function updateHUD(hudEl: HTMLElement, overlayEl: HTMLElement, state: Gam
 
       const x = offsetX + c * cell;
       const y = offsetY + r * cell;
-      ctx.fillStyle = colorFor(v); // ← use per-cell color
+      ctx.fillStyle = colorFor(v);
       ctx.fillRect(x, y, cell, cell);
       ctx.strokeStyle = strokeColor;
       ctx.strokeRect(x + 0.5, y + 0.5, cell - 1, cell - 1);

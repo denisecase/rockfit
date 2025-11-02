@@ -9,7 +9,7 @@
 ![Code Style: Prettier](https://img.shields.io/badge/code_style-Prettier-ff69b4?logo=prettier)
 [![GitHub Pages](https://img.shields.io/badge/site-live-brightgreen)](https://denisecase.github.io/rockfit/)
 
-A learner-friendly falling-blocks game built with TypeScript and HTML5 Canvas.
+A friendly falling-blocks game built with TypeScript and HTML5 Canvas.
 Installable as a Progressive Web App (PWA).
 
 Initial Features:

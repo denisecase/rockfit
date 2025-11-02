@@ -43,13 +43,9 @@ In VS Code, open a new terminal (CMD+SHIFT+` or use the menu: "Terminal", "New T
 
 ```bash
 npm install
-
 npm audit fix --force
-
 npm run format
-
 npm run dev
-
 # open http://localhost:5177
 ```
 
@@ -57,14 +53,7 @@ npm run dev
 
 ## Pre-Release Verification
 
-```shell
-npm install
-npm audit fix --force
-npm run format
-npm run dev
-```
-
-Open <http://localhost:5177>.
+Make changes, then run the Quick Start commands to verify.
 
 Final commit and tag:
 

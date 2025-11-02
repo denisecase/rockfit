@@ -1,6 +1,6 @@
 // ============================================================
 // File: src/game/state.ts
-// Purpose: Manage the game’s current state in memory
+// Purpose: Manage the game state in memory
 // ------------------------------------------------------------
 // Holds the grid, active piece, next queue, score, level, and
 // control flags (paused, gameOver). State changes are handled
@@ -18,6 +18,7 @@ export interface GameState {
   score: number;
   level: number;
   lines: number;
+  combo: number; // track consecutive line clears
   paused: boolean;
   gameOver: boolean;
 }
@@ -33,6 +34,7 @@ export function newGameState(width = 10, height = 20): GameState {
     score: 0,
     level: 1,
     lines: 0,
+    combo: 0,
     paused: false,
     gameOver: false
   };

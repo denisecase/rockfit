@@ -233,6 +233,32 @@ button[data-action="pause"] {
   touch-action: manipulation;
 }
 
+/* ---------- Shared small button styling ---------- */
+button.small {
+  appearance: none;
+  font: inherit;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+  background: transparent;
+  color: var(--accent);
+  padding: 8px 14px;
+  min-height: 44px;
+  min-width: 88px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+/* Clear High Score stays outline-only for hierarchy */
+#clear-data {
+  margin: 6px 0;
+  background: transparent;
+  border-color: var(--panel-border);
+}
+#clear-data:hover {
+  background: #333333;
+}
+
 /* ---------- Footer: bottom-most, safe area padding, visible under touchbar ---------- */
 footer {
   position: fixed;
