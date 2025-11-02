@@ -65,3 +65,5 @@ The main code is in the [`src`](./src/) folder. For an overview, see: [`SRC.md`]
 ## Making Changes
 
 To make changes, see: [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+
+![screenshot](./images/screenshot.png)
